@@ -13,43 +13,37 @@ import javax.swing.text.DefaultHighlighter
 class MainWindow : JFrame(){
 
     private val textBlock: JEditorPane
+    private val textString: JTextField
+ //   private val textSubstit: JTextField
+    private val btnFindAddres: JButton
     private val btnFind: JButton
-    private val btnSave: JButton
+    private val btnSubstit: JButton
     private val btnOpen: JButton
     init{
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         minimumSize = Dimension(500, 500)
         textBlock = JEditorPane()
         btnFind = JButton()
-        btnFind.text = "Найти адрес"
-        btnFind.addActionListener { find() }
-        btnSave= JButton()
-        btnSave.text="Сохранить"
-        btnSave.addActionListener {
-            try{
-                var filefilter=FileNameExtensionFilter(".txt", "txt")
-                var s: String? = null
-                val d=JFileChooser()
-                d.isAcceptAllFileFilterUsed=false
-                d.fileFilter=filefilter
-                d.currentDirectory= File(".")
-                d.dialogTitle="Сохранить файл"
-                d.approveButtonText="Сохранить"
-                val res=d.showSaveDialog(parent)
-                if (res==JFileChooser.APPROVE_OPTION){
-                    s=d.selectedFile.absolutePath ?: ""
-                    if (!d.fileFilter.accept(d.selectedFile)){
-                        s+="."+(filefilter?.extensions?.get(0)?:"")
-                    }
-                }
-                val fileOutputStream = FileOutputStream(s)
-                fileOutputStream.write(textBlock.text.toByteArray())
-                fileOutputStream.close()
-            }
-            catch(e: Exception){}
+        btnFind.text = "Найти"
+        btnFind.addActionListener(){
+           findSequence()
+        }
+        btnFindAddres=JButton()
+        btnFindAddres.text="Найти e-mail"
+        btnFindAddres.addActionListener {
+    //        var rx="[^@\\s]+@[^@.\\s]+\\.[^@\\s]+"
+            var rx="([0-9A-Za-z_-])[0-9A-Za-z_.+]*@(?:[0-9A-Za-z_-]+\\.)+[A-Za-z]{2,4}"
+            find(rx)
+        }
+        textString = JTextField()
+    //    textSubstit = JTextField()
+        btnSubstit=JButton()
+        btnSubstit.text="Найти и заменить гиперссылки"
+        btnSubstit.addActionListener{
+            changeHyperlink()
         }
         btnOpen= JButton()
-        btnOpen.text="Открыть"
+        btnOpen.text="Открыть файл"
         btnOpen.addActionListener {
             try{
                 var filefilter=FileNameExtensionFilter(".txt", "txt")
@@ -85,11 +79,18 @@ class MainWindow : JFrame(){
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.CENTER)
                     .addComponent(textBlock, 450, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                     .addGroup(gl.createSequentialGroup()
-                        .addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(textString, 250, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                         .addGap(10)
                         .addComponent(btnFind, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addGap(10)
-                        .addComponent(btnSave, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    )
+                    .addGroup(gl.createSequentialGroup()
+                   //     .addComponent(textSubstit, 250, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                    //    .addGap(20)
+                        .addComponent(btnSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                        .addGap(20)
+                        .addComponent(btnFindAddres, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                     )
                 )
                 .addGap(4)
@@ -98,21 +99,28 @@ class MainWindow : JFrame(){
             gl.createSequentialGroup()
                 .addGap(4)
                 .addComponent(textBlock, 400, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                .addGap(4)
+                .addGap(5)
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.CENTER)
-                    .addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(textString, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnFind, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSave, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                 )
-                .addGap(4)
+                .addGap(5)
+                .addGroup(gl.createParallelGroup(GroupLayout.Alignment.CENTER)
+                  //  .addComponent(textSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnFindAddres, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
+                )
+                .addGap(5)
+                //.addGap(10)
         )
 
         pack()
     }
 
-    private fun find() {
+    private fun find(rx: String) {
         val rh = RegexHelper()
-        rh.regex = "[^@\\s]+@[^@.\\s]+\\.[^@\\s\\.]+"
+        rh.regex = rx
         var txt = textBlock.text
         txt = txt.replace("\r", "")
         val result = rh.findIn(txt)
@@ -126,5 +134,49 @@ class MainWindow : JFrame(){
             } catch (e: BadLocationException){}
         }
     }
-}
 
+    private fun findSequence(){
+        var st=textString.text
+        if (st.matches("[a-zA-Z]+".toRegex())){
+            find("([^\\s]+)?"+st+"([^\\s]+)?")
+        }
+        else{
+            if (!st.matches("[a-zA-Z\\s]+".toRegex())){
+                find("(\\s)?"+st+"(\\s)?")
+            }
+        }
+    }
+
+    private fun changeHyperlink() {
+        val rh = RegexHelper()
+        rh.regex = "(?:https|http)(?:\\:\\/\\/)(?:[^ ]*)"
+        var txt = textBlock.text
+        txt = txt.replace("\r", "")
+        val result = rh.findIn(txt)
+        var changedText = txt
+        for (res in result) {
+            try {
+                var ft = res.first
+                var sd = res.second
+                if (sd - ft > 40) {
+                    var oldSubstr = txt.substring(ft, sd)
+                    var newSubstr = txt.substring(ft, ft + 30) + "***" + txt.substring(sd - 10, sd)
+                    changedText = changedText.replace(oldSubstr, newSubstr)
+                }
+            } catch (e: BadLocationException) {
+            }
+        }
+        textBlock.text = changedText
+        val result2 = rh.findIn(changedText)
+        val h = textBlock.highlighter
+        val hp = DefaultHighlighter
+            .DefaultHighlightPainter(Color.YELLOW)
+        h.removeAllHighlights()
+        for (res in result2) {
+            try {
+                h.addHighlight(res.first, res.second, hp)
+            } catch (e: BadLocationException) {
+            }
+        }
+    }
+}

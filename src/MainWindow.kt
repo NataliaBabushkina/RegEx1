@@ -14,7 +14,6 @@ class MainWindow : JFrame(){
 
     private val textBlock: JEditorPane
     private val textString: JTextField
- //   private val textSubstit: JTextField
     private val btnFindAddres: JButton
     private val btnFind: JButton
     private val btnSubstit: JButton
@@ -36,7 +35,6 @@ class MainWindow : JFrame(){
             find(rx)
         }
         textString = JTextField()
-    //    textSubstit = JTextField()
         btnSubstit=JButton()
         btnSubstit.text="Найти и заменить гиперссылки"
         btnSubstit.addActionListener{
@@ -86,8 +84,6 @@ class MainWindow : JFrame(){
                         .addComponent(btnOpen, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                     )
                     .addGroup(gl.createSequentialGroup()
-                   //     .addComponent(textSubstit, 250, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
-                    //    .addGap(20)
                         .addComponent(btnSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                         .addGap(20)
                         .addComponent(btnFindAddres, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -107,12 +103,11 @@ class MainWindow : JFrame(){
                 )
                 .addGap(5)
                 .addGroup(gl.createParallelGroup(GroupLayout.Alignment.CENTER)
-                  //  .addComponent(textSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnSubstit, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnFindAddres, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
                 )
                 .addGap(5)
-                //.addGap(10)
+
         )
 
         pack()
